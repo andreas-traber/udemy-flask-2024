@@ -1,13 +1,17 @@
 import uuid
 from flask import request
-from flask.views import  MethodView
+from flask.views import MethodView
 from flask_smorest import Blueprint, abort
-from db import items
+from db import items, stores
+from schemas import ItemSchema
 
 blp = Blueprint("Items", __name__, description="Operations on items")
 
+
 @blp.route("/item/<string:item_id>")
 class Item(MethodView):
+
+    @blp.response(200, ItemSchema)
     def get(self, item_id):
         try:
             return items[item_id]
@@ -21,10 +25,10 @@ class Item(MethodView):
         except KeyError:
             abort(404, message="Item not found")
 
-    def put(self, item_id):
+    @blp.arguments(ItemSchema)
+    @blp.response(200, ItemSchema)
+    def put(self, item_data, item_id):
         item_data = request.get_json()
-        if any(key not in item_data for key in ["price", "name"]):
-            abort(400, message="Bad request. Ensure 'price' and 'name' are included in the JSON payload.")
         try:
             item = items[item_id]
             item |= item_data
@@ -32,15 +36,16 @@ class Item(MethodView):
         except KeyError:
             abort(404, message="Item not found")
 
+
 @blp.route("/item")
 class ItemList(MethodView):
+    @blp.response(200, ItemSchema(many=True))
     def get(self):
-        return {'items': list(items.values())}
+        return items.values()
 
-    def post(self):
-        item_data = request.get_json()
-        if any(key not in item_data for key in ["price", "store_id", "name"]):
-            abort(400, message="Bad request. Ensure 'price', 'store_id' and 'name' are included in the JSON payload.")
+    @blp.arguments(ItemSchema)
+    @blp.response(201, ItemSchema)
+    def post(self, item_data):
         for item in items.values():
             if (item_data["name"] == item["name"] and item_data["store_id"] == item["store_id"]):
                 abort(400, message="Item already exists.")
@@ -50,4 +55,4 @@ class ItemList(MethodView):
         item_id = uuid.uuid4().hex
         item = {**item_data, "id": item_id}
         items["item_id"] = item
-        return item, 201
+        return item
