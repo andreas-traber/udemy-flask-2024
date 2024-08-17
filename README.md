@@ -8,6 +8,7 @@ Since this comes from a basics course, there are obviously a few issues with the
 
 ## Building
 ### Virtual Environment
+**Note:** This project was developed using python 3.12.3
 ```
 python -m venv venv 
 source venv/bin/activate

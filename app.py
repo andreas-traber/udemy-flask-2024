@@ -3,6 +3,7 @@ import os
 from flask import Flask
 from flask_smorest import Api
 from flask_jwt_extended import JWTManager
+from flask_migrate import Migrate
 
 from db import db
 from blocklist import BLOCKLIST
@@ -29,6 +30,7 @@ def create_app(db_url=None):
     )
     app.config["SQLALCHEMY_TRACK_MODIFICATIONS"] = False
     db.init_app(app)
+    migrate = Migrate(app, db)
 
     api = Api(app)
     app.config["JWT_SECRET_KEY"] = "123853720532633570538762837813013483418"
@@ -75,12 +77,6 @@ def create_app(db_url=None):
             "message": "Request does not contain an access token.",
             "error": "authorization_required",
         }, 401
-
-    @app.before_request
-    def create_tables():
-        app.before_request_funcs[None].remove(create_tables)
-
-        db.create_all()
 
     api.register_blueprint(ItemBlueprint)
     api.register_blueprint(StoreBlueprint)
