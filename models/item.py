@@ -12,3 +12,4 @@ class ItemModel(db.Model):
     )
 
     store = db.relationship("StoreModel")
+    tags = db.relationship("TagModel", secondary="item_tags")
