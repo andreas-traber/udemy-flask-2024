@@ -13,11 +13,19 @@ Since this comes from a basics course, there are obviously a few issues with the
 python -m venv venv 
 source venv/bin/activate
 pip install -r requirements.txt
+flask db upgrade
+
 ```
 
 ### Docker Compose
 ```
 docker compose build 
+```
+To build the database schema when creating this for the first time run
+```
+docker compose up -d
+docker compose exec web flask db upgrade
+docker compose down
 ```
 
 ## Running
